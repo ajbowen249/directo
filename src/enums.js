@@ -1,4 +1,34 @@
 /**
+ * Structure of an imperative sentence.
+ */
+const Format = {
+  /** Verb-only command */
+  V: 'V',
+  /** Verb followed by an object */
+  VO: 'VO',
+  /** verb, preposition, object */
+  VPO: 'VPO',
+  /** verb, object, preposition, subject */
+  VOPS: 'VOPS',
+  /** verb, determiner, object */
+  VDO: 'VDO',
+  /** verb, subject, determiner, object */
+  VSDO: 'VSDO'
+};
+
+/**
+ * The outcome of processTexting a block of text.
+ */
+const CommandResult = {
+  /** The command exists, but was not properly formatted. */
+  FORMAT_ERROR: 'FORMAT_ERROR',
+  /** The command was successfully handled. */
+  HANDLED: 'HANDLED',
+  /** Found nothing to do with the provided text. */
+  UNHANDLED: 'UNHANDLED',
+};
+
+/**
  * An english preposition
  */
 const Preposition = {
@@ -51,6 +81,8 @@ const Determiner = {
 };
 
 module.exports = {
+  Format,
+  CommandResult,
   Preposition,
   Determiner
 }
