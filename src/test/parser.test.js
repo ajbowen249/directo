@@ -1,5 +1,5 @@
 const { Format } = require('../enums');
-const { classify } = require('../parser');
+const { classify, normalizeNumbers } = require('../parser');
 
 [
   {
@@ -130,4 +130,27 @@ const { classify } = require('../parser');
   it(testCase.description, () => {
     expect(classify(testCase.input)).toEqual(testCase.expected);
   });
+});
+
+[
+  // {
+  //   input: [ 'one' ],
+  //   expected: [ 1 ]
+  // },
+  // {
+  //   input: [ 'seventy-four' ],
+  //   expected: [ 74 ]
+  // },
+  {
+    input: [ 'nine', 'hundred', 'eighty', 'million', 'two', 'hundred', 'seventeen', 'thousand', 'six', 'hundred', 'fifty-four' ],
+    expected: [ 980217654 ]
+  },
+  // {
+  //   input: [ 'one', 'million', 'ants' ],
+  //   expected: [ 1000000, 'ants' ]
+  // }
+].forEach(testCase => {
+  it('correctly parses numbers', () => {
+    expect(normalizeNumbers(testCase.input)).toEqual(testCase.expected);
+  })
 });
