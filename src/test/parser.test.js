@@ -1,5 +1,5 @@
 const { Format } = require('../enums');
-const { classify } = require('../parser');
+const { classify, tryParseNumber } = require('../parser');
 
 [
   {
@@ -100,6 +100,7 @@ const { classify } = require('../parser');
       verb: 'eat',
       determiner: 'the',
       object: 'cake',
+      quantity: 1
     },
   },
   {
@@ -112,6 +113,7 @@ const { classify } = require('../parser');
       subject: 'steve',
       determiner: 'the',
       object: 'cookie',
+      quantity: 1
     },
   },
   {
@@ -124,10 +126,85 @@ const { classify } = require('../parser');
       subject: 'fair lady stevie',
       determiner: 'my',
       object: 'undying devotion',
+      quantity: 1
+    },
+  },
+  {
+    description: 'picks up on articles as quantifying determiners',
+    input: 'give fred a hug',
+    expected: {
+      classified: true,
+      format: Format.VSDO,
+      verb: 'give',
+      subject: 'fred',
+      determiner: 'a',
+      quantity: 1,
+      object: 'hug',
+    },
+  },
+  {
+    description: 'picks up on numbers as quantifying determiners',
+    input: 'give fred seventy-five hugs',
+    expected: {
+      classified: true,
+      format: Format.VSDO,
+      verb: 'give',
+      subject: 'fred',
+      determiner: 'seventy-five',
+      quantity: 75,
+      object: 'hugs',
+    },
+  },
+  {
+    description: 'picks up on numerals as quantifying determiners',
+    input: 'give fred 10,975.2 hugs',
+    expected: {
+      classified: true,
+      format: Format.VSDO,
+      verb: 'give',
+      subject: 'fred',
+      determiner: '10,975.2',
+      quantity: 10975.2,
+      object: 'hugs',
     },
   }
 ].forEach(testCase => {
   it(testCase.description, () => {
     expect(classify(testCase.input)).toEqual(testCase.expected);
+  });
+});
+
+[
+  {
+    input: '1',
+    expected: 1
+  },
+  {
+    input: 'two',
+    expected: 2
+  },
+  {
+    input: 'three',
+    expected: 3
+  },
+  {
+    input: 'fifty-five',
+    expected: 55
+  },
+  {
+    input: 'ninety-four',
+    expected: 94
+  },
+  {
+    input: '1,237,564.25',
+    expected: 1237564.25
+  },
+  {
+    input: 'flarbendugal',
+    expected: undefined
+  }
+].forEach(testCase => {
+  it('parses numbers or returns undefined', () => {
+    expect(tryParseNumber(testCase.input)).toEqual(testCase.expected);
   });
 });
