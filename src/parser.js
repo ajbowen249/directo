@@ -1,4 +1,4 @@
-const { Format, Preposition, Determiner } = require('./enums');
+const { Format, Preposition, Determiner, BaseNumbers, Digits, TensNumbers } = require('./enums');
 
 const ALL_PREPOSITIONS = Object.values(Preposition);
 const ALL_DETERMINERS = Object.values(Determiner);
@@ -52,13 +52,17 @@ function classify(text) {
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
-    if (ALL_DETERMINERS.includes(token.toUpperCase())) {
+    const quantity = tryParseNumber(token);
+    const isNumber = quantity !== undefined;
+
+    if (isNumber || ALL_DETERMINERS.includes(token.toUpperCase())) {
       if (i === 0) {
         return {
           classified: true,
           format: Format.VDO,
           verb,
           determiner: token,
+          quantity: quantity || 1,
           object: tokens.slice(i + 1).join(' ')
         };
       } else {
@@ -68,6 +72,7 @@ function classify(text) {
           verb,
           subject: tokens.slice(0, i).join(' '),
           determiner: token,
+          quantity: quantity || 1,
           object: tokens.slice(i + 1).join(' ')
         };
       }
@@ -82,6 +87,47 @@ function classify(text) {
   };
 }
 
+function parseTensNumber(upperToken) {
+  const parts = upperToken.split('-');
+  const tens = parts[0];
+  const ones = parts[1];
+  let value = TensNumbers[tens];
+  if (!value) {
+    return undefined;
+  }
+
+  if (ones) {
+    return Digits[ones] !== undefined ? value + Digits[ones] : undefined;
+  }
+
+  return value;
+}
+
+function parseSubHundred(upperToken) {
+  const maybeBase = BaseNumbers[upperToken];
+  if (maybeBase !== undefined) {
+    return maybeBase;
+  }
+
+  return parseTensNumber(upperToken);
+}
+
+function tryParseNumber(token) {
+  const upperToken = token.toUpperCase().replace(/,/g, '');
+  let maybeNumber = parseFloat(upperToken);
+  if (!isNaN(maybeNumber)) {
+    return maybeNumber;
+  }
+
+  maybeNumber = parseSubHundred(upperToken);
+  if (maybeNumber !== undefined) {
+    return maybeNumber;
+  }
+
+  return undefined;
+}
+
 module.exports = {
-  classify
+  classify,
+  tryParseNumber
 };
